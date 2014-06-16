@@ -76,11 +76,16 @@ void matrix_base<T>::divide_matrix()
      for (auto i = 0; i != 3; ++i)
      {
           vec[i].assign(4, matrix<T>{});
-          for (auto j = 0; j != 4; ++j)
+          for (auto j = 0, k = 0; j != 4; ++k)
           {
-               vec[i][j].assign(len, vector<T>{}); 
-               for (auto k = 0; k !=  len; ++k)
-                    vec[i][j][k].assign(len, 0); 
+               if (k == 0)
+                   vec[i][j].assign(len, vector<T>{}); 
+               vec[i][j][k].assign(len, 0);
+               if (k == len - 1)
+               {
+                   ++j;
+                   k = -1; 
+               }
           }
      }
 }
