@@ -20,6 +20,21 @@ void merge_matrix(matrix<matrix<T>>&, tuple<T, T, T, T, T>);
 template <typename T>
 matrix<T> square_matrix_multiply_recursive(matrix<T>&, matrix<T>&);
 
+template <typename T>
+class matrix_base
+{
+      public:
+         void divide_matrix();
+         void assign_matrix(int);
+         void merge_matrix(tuple<T, T, T, T, T>);
+         matrix_base(size_t, matrix<int>&, vector<matrix<T>*>&);
+      private:
+         size_t len;
+         matrix<int>& index ;
+         matrix<matrix<T>> vec;
+         vector<matrix<T>*>& V;
+};
+
 int main(int argc, char* argv[])
 {
     matrix<int> matrix_A = { { 1, 2, 3, 4 }, 
@@ -54,7 +69,14 @@ void print_matrix(const matrix<T>& M)
 }
 
 template <typename T>
-void divide_matrix(matrix<matrix<T>>& vec, size_t len)
+matrix_base<T>::matrix_base(size_t _len, matrix<int>& _index,  
+vector<matrix<T>*>& _V)  : len(_len), index(_index), V(_V)
+{
+     vec.assign(3, matrix<vector<T>>{});    
+}
+
+template <typename T>
+void matrix_base<T>::divide_matrix()
 {
      for (auto i = 0; i != 3; ++i)
      {
@@ -69,15 +91,42 @@ void divide_matrix(matrix<matrix<T>>& vec, size_t len)
 }
 
 template <typename T>
-void merge_matrix(matrix<matrix<T>>& V, tuple<T, T, T, T, T> index)
+void matrix_base<T>::merge_matrix(tuple<T, T, T, T, T> index)
 {
      auto i = get<4>(index);
-     auto matrix_l = square_matrix_multiply_recursive(V[0][get<0>(index)], V[1][get<1>(index)]);
-     auto matrix_r = square_matrix_multiply_recursive(V[0][get<2>(index)], V[1][get<3>(index)]);
+     auto matrix_l = square_matrix_multiply_recursive(vec[0][get<0>(index)], vec[1][get<1>(index)]);
+     auto matrix_r = square_matrix_multiply_recursive(vec[0][get<2>(index)], vec[1][get<3>(index)]);
      for (auto j = 0; j != matrix_l.size(); ++j)
      {
           for (auto k = 0; k != matrix_r.size(); ++k)
-               V[2][i][j][k] = matrix_l[j][k] + matrix_r[j][k];
+               vec[2][i][j][k] = matrix_l[j][k] + matrix_r[j][k];
+     }
+}
+
+template <typename T>
+void matrix_base<T>::assign_matrix(int reverse)
+{
+     for (auto i = 0; i != 4; ++i)
+     {
+          for (auto j = 0, k = 0; k !=  len; ++j)
+          {
+               auto row = k + index[i][0];
+               auto col = j + index[i][1];
+               if (reverse)
+               {
+                   vec[0][i][k][j] = (*V[0])[row][col];
+                   vec[1][i][k][j] = (*V[1])[row][col];
+               } 
+               else   
+               {
+                   (*V[2])[row][col] = vec[2][i][k][j];
+               }
+               if (j == len - 1)
+               {  
+                   j = -1;
+                   ++k; 
+               }
+          }
      }
 }
 
@@ -93,38 +142,16 @@ matrix<T> square_matrix_multiply_recursive(matrix<T>& A, matrix<T>& B)
           C[0][0] = A[0][0] * B[0][0];
      else
      {
-          matrix<matrix<T>> vec(3, matrix<vector<T>>{});
-          divide_matrix(vec, len);
           matrix<int> index = { {0, 0}, {0, len}, {len, 0}, {len, len} };
-          for (auto i = 0; i != 4; ++i)
-          {
-               for (auto j = 0; j !=  len; ++j)
-               {
-                    for (auto k = 0; k != len; ++k)
-                    {
-                         auto row = j + index[i][0];
-                         auto col = k + index[i][1];
-                         vec[0][i][j][k] = A[row][col];
-                         vec[1][i][j][k] = B[row][col];
-                    } 
-               }
-          }
-          merge_matrix(vec, make_tuple(0,1,1,3,1));
-          merge_matrix(vec, make_tuple(0,0,1,2,0));
-          merge_matrix(vec, make_tuple(2,0,3,2,2));
-          merge_matrix(vec, make_tuple(2,1,3,3,3));
-          for (auto i = 0; i != 4; ++i)
-          {
-               for (auto j = 0; j !=  len; ++j)
-               {
-                    for (auto k = 0; k != len; ++k)
-                    {
-                         auto row = j + index[i][0];
-                         auto col = k + index[i][1];
-                         C[row][col] = vec[2][i][j][k];
-                    }
-               }
-          } 
+          vector<matrix<T>*> V = { &A, &B, &C };
+          matrix_base<T> mb(len, index, V);
+          mb.divide_matrix();
+          mb.assign_matrix(1);
+          mb.merge_matrix(make_tuple(0,1,1,3,1));
+          mb.merge_matrix(make_tuple(0,0,1,2,0));
+          mb.merge_matrix(make_tuple(2,0,3,2,2));
+          mb.merge_matrix(make_tuple(2,1,3,3,3));
+          mb.assign_matrix(0);
      }
      return C;
 }
