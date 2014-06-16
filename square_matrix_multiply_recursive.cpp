@@ -12,12 +12,6 @@ template <typename T>
 void print_matrix(const matrix<T>&);
 
 template <typename T>
-void divide_matrix(matrix<matrix<T>>&, size_t);
-
-template <typename T>
-void merge_matrix(matrix<matrix<T>>&, tuple<T, T, T, T, T>);
-
-template <typename T>
 matrix<T> square_matrix_multiply_recursive(matrix<T>&, matrix<T>&);
 
 template <typename T>
