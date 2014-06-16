@@ -54,9 +54,10 @@ int main(int argc, char* argv[])
 template <typename T>
 void print_matrix(const matrix<T>& M)
 {
-     for (auto row = 0; row != M.size(); ++row)
+     auto size = M.size();
+     for (auto row = 0; row != size; ++row)
      {
-          for (auto col = 0; col != M.size(); ++col)
+          for (auto col = 0; col != size; ++col)
                cout << M[row][col] << " ";
           cout << endl; 
      }
@@ -96,10 +97,11 @@ void matrix_base<T>::merge_matrix(tuple<T, T, T, T, T> index)
      auto i = get<4>(index);
      auto matrix_l = square_matrix_multiply_recursive(vec[0][get<0>(index)], vec[1][get<1>(index)]);
      auto matrix_r = square_matrix_multiply_recursive(vec[0][get<2>(index)], vec[1][get<3>(index)]);
-     for (auto j = 0; j != matrix_l.size(); ++j)
+     auto size = matrix_l.size();
+     for (auto row = 0; row != size; ++row)
      {
-          for (auto k = 0; k != matrix_r.size(); ++k)
-               vec[2][i][j][k] = matrix_l[j][k] + matrix_r[j][k];
+          for (auto col = 0; col != size; ++col)
+               vec[2][i][row][col] = matrix_l[row][col] + matrix_r[row][col];
      }
 }
 
