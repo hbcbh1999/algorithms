@@ -67,6 +67,7 @@ matrix_base<T>::matrix_base(size_t _len, matrix<int>& _index,
 vector<matrix<T>*>& _V)  : len(_len), index(_index), V(_V)
 {
      vec.assign(3, matrix<vector<T>>{});    
+     divide_matrix();
 }
 
 template <typename T>
@@ -139,7 +140,6 @@ matrix<T> square_matrix_multiply_recursive(matrix<T>& A, matrix<T>& B)
           matrix<int> index = { {0, 0}, {0, len}, {len, 0}, {len, len} };
           vector<matrix<T>*> V = { &A, &B, &C };
           matrix_base<T> mb(len, index, V);
-          mb.divide_matrix();
           mb.assign_matrix(1);
           mb.merge_matrix(make_tuple(0,1,1,3,1));
           mb.merge_matrix(make_tuple(0,0,1,2,0));
